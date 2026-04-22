@@ -10,3 +10,11 @@ pub struct Executor {
     tasks: VecDeque<Task>,
 
 }
+
+impl Executor{
+    fn new() -> Self {
+        Executor {
+            tasks: VecDeque::new(),
+        }
+    }
+}
