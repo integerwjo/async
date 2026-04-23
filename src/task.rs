@@ -1,15 +1,17 @@
 use std::future::Future;
 use std::pin::Pin;
+use std::sync::Mutex;
 type BoxFuture = Pin<Box<dyn Future<Output = ()> + Send + 'static>>;
 
+
+
 pub struct Task {
-    id: u32,
-    future: BoxFuture
+    future: Option<Mutex<BoxFuture>>
 }
 
 impl Task {
     /// creating a new task
-    fn new(id: u32, future: BoxFuture) -> Task {
-        Task { id, future }
+    pub fn new(future: BoxFuture) -> Task {
+        Task { future: Some(Mutex::new(future)) }
     }
 }
