@@ -6,7 +6,7 @@ type BoxFuture = Pin<Box<dyn Future<Output = ()> + Send + 'static>>;
 
 
 pub struct Task {
-    future: Option<Mutex<BoxFuture>>
+    pub future: Option<Mutex<BoxFuture>>
 }
 
 impl Task {
