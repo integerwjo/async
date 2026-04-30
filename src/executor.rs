@@ -15,7 +15,7 @@ impl Executor {
     pub fn run(&self) {
         while let Ok(task) = self.tasks.recv() {
             println!("Got task executing...");
-            task.future.po
+            
         }
     }
 }
