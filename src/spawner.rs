@@ -11,6 +11,7 @@ pub struct Spawner {
 
 impl Spawner {
     /// creating a new instance of spawner
+    /// A s
     pub fn new(&self, future: impl Future<Output = ()> + Send + 'static) {
         let task = Arc::new(Task::new(Box::pin(future)));
         self.task_sender.send(task).expect("Failed to send task");

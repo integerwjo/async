@@ -8,6 +8,7 @@ struct Reactor{
 impl Reactor {
     fn new() -> Reactor {
         Reactor {
+            
         }
     }
 }
