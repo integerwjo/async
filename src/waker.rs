@@ -6,6 +6,6 @@ struct Waker {
 
 impl Waker {
     fn wake() {
-        
+         
     }
 }
