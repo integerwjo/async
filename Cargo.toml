@@ -1,8 +1,7 @@
 [package]
-name = "async_runtime"
+name = "b-reactor-executor"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-futures = "0.3.32"
-tokio = "1.52.1"
+mio = { version = "0.8", features = ["net", "os-poll"] }
