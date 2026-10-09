@@ -55,10 +55,8 @@ impl Future for Coroutine0 {
         loop {
             match self.state {
                 State0::Start => {
-                    // ---- Code you actually wrote ----
                     println!("Program starting");
 
-                    // ---------------------------------
                     let fut1 = Box::new(http::Http::get("/600/HelloAsyncAwait"));
                     self.state = State0::Wait1(fut1);
                 }
@@ -66,10 +64,10 @@ impl Future for Coroutine0 {
                 State0::Wait1(ref mut f1) => {
                     match f1.poll(waker) {
                         PollState::Ready(txt) => {
-                            // ---- Code you actually wrote ----
+                        
                             println!("{txt}");
 
-                            // ---------------------------------
+                            
                             let fut2 = Box::new(http::Http::get("/400/HelloAsyncAwait"));
                             self.state = State0::Wait2(fut2);
                         }
@@ -80,10 +78,10 @@ impl Future for Coroutine0 {
                 State0::Wait2(ref mut f2) => {
                     match f2.poll(waker) {
                         PollState::Ready(txt) => {
-                            // ---- Code you actually wrote ----
+                            
                             println!("{txt}");
 
-                            // ---------------------------------
+                            
                             self.state = State0::Resolved;
                             break PollState::Ready(String::new());
                         }
