@@ -149,3 +149,116 @@ impl Executor {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::future::{Future, PollState};
+    use std::sync::{
+        Arc,
+        atomic::{AtomicBool, AtomicUsize, Ordering},
+    };
+
+    struct ReadyFuture {
+        done: Arc<AtomicBool>,
+    }
+
+    impl Future for ReadyFuture {
+        type Output = String;
+
+        fn poll(&mut self, _waker: &Waker) -> PollState<Self::Output> {
+            self.done.store(true, Ordering::SeqCst);
+            PollState::Ready("done".to_string())
+        }
+    }
+
+    struct WakeFuture {
+        remaining: usize,
+        polls: Arc<AtomicUsize>,
+        done: Arc<AtomicBool>,
+    }
+
+    impl Future for WakeFuture {
+        type Output = String;
+
+        fn poll(&mut self, waker: &Waker) -> PollState<Self::Output> {
+            self.polls.fetch_add(1, Ordering::SeqCst);
+
+            if self.remaining == 0 {
+                self.done.store(true, Ordering::SeqCst);
+                PollState::Ready("done".to_string())
+            } else {
+                self.remaining -= 1;
+                waker.wake();
+                PollState::NotReady
+            }
+        }
+    }
+
+    fn reset_executor_core() {
+        CURRENT_EXEC.with(|e| {
+            e.tasks.borrow_mut().clear();
+            e.ready_queue.lock().unwrap().clear();
+            e.next_id.set(0);
+        });
+    }
+
+    #[test]
+    fn block_on_polls_a_ready_future() {
+        reset_executor_core();
+
+        let done = Arc::new(AtomicBool::new(false));
+        let mut executor = Executor::new();
+
+        executor.block_on(ReadyFuture { done: done.clone() });
+
+        assert!(done.load(Ordering::SeqCst));
+    }
+
+    #[test]
+    fn block_on_repolls_a_task_after_it_is_woken() {
+        reset_executor_core();
+
+        let done = Arc::new(AtomicBool::new(false));
+        let polls = Arc::new(AtomicUsize::new(0));
+        let mut executor = Executor::new();
+
+        executor.block_on(WakeFuture {
+            remaining: 2,
+            polls: polls.clone(),
+            done: done.clone(),
+        });
+
+        assert!(done.load(Ordering::SeqCst));
+        assert_eq!(polls.load(Ordering::SeqCst), 3);
+    }
+
+    #[test]
+    fn spawn_queues_a_task_with_a_unique_id() {
+        reset_executor_core();
+
+        spawn(ReadyFuture {
+            done: Arc::new(AtomicBool::new(false)),
+        });
+
+        CURRENT_EXEC.with(|e| {
+            assert_eq!(e.tasks.borrow().len(), 1);
+            assert_eq!(e.ready_queue.lock().unwrap().as_slice(), &[0]);
+            assert_eq!(e.next_id.get(), 1);
+        });
+    }
+
+    #[test]
+    fn waker_pushes_its_task_id_to_the_ready_queue() {
+        let ready_queue = Arc::new(Mutex::new(Vec::new()));
+        let waker = Waker {
+            thread: thread::current(),
+            id: 42,
+            ready_queue: ready_queue.clone(),
+        };
+
+        waker.wake();
+
+        assert_eq!(*ready_queue.lock().unwrap(), vec![42]);
+    }
+}

@@ -84,3 +84,26 @@ impl Future for HttpGetFuture {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::get_req;
+
+    #[test]
+    fn get_req_formats_a_well_formed_http_request() {
+        assert_eq!(
+            get_req("/600/HelloAsyncAwait"),
+            "GET /600/HelloAsyncAwait HTTP/1.1\r\n\
+             Host: localhost\r\n\
+             Connection: close\r\n\
+             \r\n"
+        );
+    }
+
+    #[test]
+    fn get_req_uses_the_given_path() {
+        let req = get_req("/users/42");
+
+        assert!(req.starts_with("GET /users/42 HTTP/1.1\r\n"));
+    }
+}
