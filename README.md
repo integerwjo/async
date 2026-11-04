@@ -4,7 +4,8 @@ A minimal asynchronous runtime implemented in Rust, featuring a reactor-executor
 
 ## Overview
 
-This project implements a simple async runtime from scratch, demonstrating core concepts such as:
+This project implements a simple async runtime from scratch.
+THe core components are:
 
 - The `Future` trait and `PollState` enum
 - A reactor pattern using `mio` for event demultiplexing
@@ -40,3 +41,4 @@ fn main() {
     executor.block_on(async_main());
 }
 ```
+
