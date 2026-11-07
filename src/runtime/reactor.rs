@@ -37,8 +37,9 @@ impl Reactor {
         self.registry.register(stream, Token(id), interest).unwrap();
     }
 
-    pub fn deregister(&self, stream: &mut TcpStream, _id: usize) {
+    pub fn deregister(&self, stream: &mut TcpStream, id: usize) {
         self.registry.deregister(stream).unwrap();
+        let _ = self.wakers.lock().map(|mut w| w.remove(&id)).unwrap();
     }
 
     // Adds the waker to the hashmap using the id property as key to identify it
