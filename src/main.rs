@@ -3,7 +3,6 @@ mod http;
 mod runtime;
 
 use future::{Future, PollState};
-use runtime::Runtime;
 use runtime::Waker;
 fn main() {
     let mut executor = runtime::init();

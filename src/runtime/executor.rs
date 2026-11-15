@@ -2,7 +2,6 @@ use crate::future::{Future, PollState};
 use std::{
     cell::{Cell, RefCell},
     collections::HashMap,
-    future,
     sync::{Arc, Mutex},
     thread::{self, Thread},
 };
