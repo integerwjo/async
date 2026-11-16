@@ -63,9 +63,9 @@ fn event_loop(mut poll: Poll, wakers: Wakers) {
 
         for e in events.iter() {
             let Token(id) = e.token();
-            let wakers = wakers.lock().unwrap();
+            let waker = wakers.lock().unwrap().get(&id).cloned();
 
-            if let Some(waker) = wakers.get(&id) {
+            if let Some(waker) = waker {
                 waker.wake();
             }
         }
